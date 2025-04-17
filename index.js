@@ -3,13 +3,17 @@ const mongoose = require('mongoose');
 let app = express()
 require('dotenv').config()
 const cookieParser = require('cookie-parser')
-const cors = require("cors")
+const cors = require('cors');
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://trust-frontend-12.vercel.app'
+];
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
-}))
-
+  origin: allowedOrigins,
+  credentials: true // if you use cookies or authentication
+}));
 app.use(cookieParser())
 
 const trustRoutes = require('./Routes/TrustRoutes');
