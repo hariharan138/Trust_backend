@@ -1,57 +1,83 @@
 const express = require('express');
 const mongoose = require('mongoose');
-let app = express()
-require('dotenv').config()
-const cookieParser = require('cookie-parser')
+const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
+dotenv.config();
+
+const app = express();
+
+// ✅ Allowed frontend origins
 const allowedOrigins = [
   'http://localhost:3000',
   'https://trust-frontend-12.vercel.app'
 ];
 
+// ✅ CORS Middleware
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true // if you use cookies or authentication
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true // ✅ allow cookies/auth headers
 }));
-app.use(cookieParser())
 
+// ✅ To handle preflight requests
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// ✅ Middleware
+app.use(express.json());
+app.use(cookieParser());
+
+// ✅ Check or create uploads folder
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// ✅ Routes
 const trustRoutes = require('./Routes/TrustRoutes');
 const userRoute = require('./Routes/UserRoutes');
 const adminRoute = require('./Routes/AdminRoutes');
-const connectDb  = require('./Database/ConnectDB');
 
-const fs = require("fs")
-const path = require("path")
+app.use("/api/trust", trustRoutes);
+app.use('/api/user', userRoute);
+app.use('/api/admin', adminRoute);
 
-app.use(express.json())
-
-const uploadsDir = path.join(__dirname, 'uploads');
-
-// Check if the folder exists, and create it if it doesn't
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
-
-app.use("/api/trust", trustRoutes)
-app.use('/api/user', userRoute)
-app.use('/api/admin', adminRoute)
-
-// Health check endpoint
+// ✅ Health Check
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK' });
+  res.status(200).json({ status: 'OK' });
 });
 
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
-    console.error("Unhandled error:", err);
-    res.status(500).json({ error: true, message: "An unexpected error occurred: " + err.message, success: false });
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: true, message: "An unexpected error occurred: " + err.message, success: false });
 });
 
+// ✅ Start Server
 const PORT = process.env.PORT || 4000;
+const connectDb = require('./Database/ConnectDB');
 
 connectDb().then(() => {
-    console.log("DB connected successfully")
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on PORT ${PORT}`)
-    })
-}).catch(err=> console.log(err.message))
+  console.log("DB connected successfully");
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on PORT ${PORT}`);
+  });
+}).catch(err => console.log(err.message));
