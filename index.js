@@ -10,16 +10,35 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allow all origins - CORS setup (without credentials)
+// ✅ Allowed frontend origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:8081'
+];
+
+// ✅ CORS Middleware
 app.use(cors({
-  origin: '*',
-  credentials: false
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true // ✅ allow cookies/auth headers
 }));
 
-// ✅ Handle preflight requests
+// ✅ To handle preflight requests
 app.options('*', cors({
-  origin: '*',
-  credentials: false
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 
 // ✅ Middleware
@@ -61,4 +80,4 @@ connectDb().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on PORT ${PORT}`);
   });
-}).catch(err => console.log(err.message));
+}).catch(err => console.log(err.message)); make this to allow for all 
