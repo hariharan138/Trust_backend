@@ -10,35 +10,16 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allowed frontend origins
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://trust-frontend-12.vercel.app'
-];
-
-// ✅ CORS Middleware
+// ✅ Allow all origins - CORS setup (without credentials)
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true // ✅ allow cookies/auth headers
+  origin: '*',
+  credentials: false
 }));
 
-// ✅ To handle preflight requests
+// ✅ Handle preflight requests
 app.options('*', cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: '*',
+  credentials: false
 }));
 
 // ✅ Middleware
