@@ -14,7 +14,7 @@ const app = express();
 const allowedOrigins = [
   'https://trust-frontend-12.vercel.app', // Production Frontend
  // 'http://localhost:3000', 
-  'https://kzmfs60ewtjn5ed4prao.lite.vusercontent.net'// Localhost Dev Frontend
+  'https://kzmfqub5w72070otwfoz.lite.vusercontent.net'// Localhost Dev Frontend
 ];
 
 // Automatically allow correct origins
