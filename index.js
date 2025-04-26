@@ -10,17 +10,27 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS Middleware - Allow All
+// ✅ CORS Proper Configuration
+const allowedOrigins = [
+  'https://trust-frontend-12.vercel.app', // Only your frontend URL allowed
+];
+
 app.use(cors({
-  origin: '*',    // Allow all origins
-  credentials: true // Allow credentials like cookies, auth headers
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 
 // ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Check or create uploads folder
+// ✅ Create uploads folder if missing
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
@@ -35,7 +45,7 @@ app.use("/api/trust", trustRoutes);
 app.use('/api/user', userRoute);
 app.use('/api/admin', adminRoute);
 
-// ✅ Health Check Route
+// ✅ Health Check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
@@ -55,4 +65,4 @@ connectDb().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server running on PORT ${PORT}`);
   });
-}).catch(err => console.log(err.message)); // make this to allow for all
+}).catch(err => console.log(err.message)); // Make this to allow for all
