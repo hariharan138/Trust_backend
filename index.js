@@ -10,23 +10,28 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS Proper Configuration
+// ✅ Smart Dynamic CORS Configuration
 const allowedOrigins = [
-  'https://trust-frontend-12.vercel.app', // Only your frontend URL allowed
+  'https://trust-frontend-12.vercel.app', // Production Frontend
+  'http://localhost:3000',                 // Localhost Dev Frontend
 ];
 
-app.use(cors({
+// Automatically allow correct origins
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('❌ Blocked CORS for origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
-}));
+  credentials: true,
+};
 
-// ✅ Middleware
+app.use(cors(corsOptions));
+
+// ✅ Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
@@ -52,17 +57,23 @@ app.get('/health', (req, res) => {
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: true, message: "An unexpected error occurred: " + err.message, success: false });
+  console.error("Unhandled error:", err.message);
+  res.status(500).json({ 
+    error: true, 
+    message: "An unexpected error occurred: " + err.message, 
+    success: false 
+  });
 });
 
 // ✅ Start Server
 const PORT = process.env.PORT || 4000;
 const connectDb = require('./Database/ConnectDB');
 
-connectDb().then(() => {
-  console.log("✅ DB connected successfully");
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Server running on PORT ${PORT}`);
-  });
-}).catch(err => console.log(err.message)); // Make this to allow for all
+connectDb()
+  .then(() => {
+    console.log("✅ DB connected successfully");
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server running on PORT ${PORT}`);
+    });
+  })
+  .catch(err => console.log("DB Connection Error:", err.message));
