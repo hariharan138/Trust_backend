@@ -10,35 +10,10 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allowed frontend origins
-const allowedOrigins = [
-  'https://trust-frontend-12.vercel.app',
-  'http://localhost:3000'
-];
-
-// ✅ CORS Middleware
+// ✅ CORS Middleware - Allow All
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true // ✅ allow cookies/auth headers
-}));
-
-// ✅ To handle preflight requests
-app.options('*', cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: '*',    // Allow all origins
+  credentials: true // Allow credentials like cookies, auth headers
 }));
 
 // ✅ Middleware
@@ -60,7 +35,7 @@ app.use("/api/trust", trustRoutes);
 app.use('/api/user', userRoute);
 app.use('/api/admin', adminRoute);
 
-// ✅ Health Check
+// ✅ Health Check Route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
@@ -76,8 +51,8 @@ const PORT = process.env.PORT || 4000;
 const connectDb = require('./Database/ConnectDB');
 
 connectDb().then(() => {
-  console.log("DB connected successfully");
+  console.log("✅ DB connected successfully");
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on PORT ${PORT}`);
+    console.log(`✅ Server running on PORT ${PORT}`);
   });
-}).catch(err => console.log(err.message)); make this to allow for all 
+}).catch(err => console.log(err.message)); // make this to allow for all
