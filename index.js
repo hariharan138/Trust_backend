@@ -13,7 +13,8 @@ const app = express();
 // ✅ Smart Dynamic CORS Configuration
 const allowedOrigins = [
   'https://trust-frontend-12.vercel.app', // Production Frontend
-  'http://localhost:3000',                 // Localhost Dev Frontend
+ // 'http://localhost:3000', 
+  'https://kzmfs60ewtjn5ed4prao.lite.vusercontent.net'// Localhost Dev Frontend
 ];
 
 // Automatically allow correct origins
