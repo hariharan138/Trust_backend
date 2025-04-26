@@ -12,6 +12,7 @@ const app = express();
 
 // ✅ Allowed frontend origins
 const allowedOrigins = [
+  'https://trust-frontend-12.vercel.app',
   'http://localhost:3000',
   'https://localhost:8081'
 ];
